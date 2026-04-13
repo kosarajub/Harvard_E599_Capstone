@@ -1,0 +1,29 @@
+name:
+  emit
+channels:
+  - conda-forge
+dependencies:
+  - gdal=3.7.2
+  - hvplot
+  - geoviews
+  - rioxarray
+  - rasterio
+  - geopandas
+  - fiona=1.9.4
+  - jupyter
+  - earthaccess
+  - jupyter_bokeh
+  - h5py
+  - h5netcdf
+  - spectral
+  - scikit-image
+  - seaborn
+  - jupyterlab
+  - dask
+  - ray-default
+  - scikit-learn
+  - py-xgboost
+  - ipykernel
+  - netCDF4
+  - rioxarray
+variables: {}
