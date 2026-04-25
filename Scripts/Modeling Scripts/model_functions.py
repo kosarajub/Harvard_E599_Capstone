@@ -6,23 +6,22 @@ import time
 import copy
 from pathlib import Path
 
-from IPython.display import display
-
 import numpy as np
 import pandas as pd
 from scipy import stats
 
 import seaborn as sns
 import matplotlib.pyplot as plt
+from IPython.display import display
 
-from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 from sklearn.metrics import r2_score, mean_squared_error
 
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score, GroupKFold
 from sklearn.model_selection import GroupShuffleSplit
+from sklearn.model_selection import cross_val_score, GroupKFold
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression, RidgeCV
@@ -79,15 +78,15 @@ def tabulate_results(results):
     rows = []
     for label, metrics in results.items():
         rows.append({
-            'Experiment'         : label,
-            'Test R²'            : round(metrics['test_r2'], 4),
-            'Test RMSE'          : round(metrics['test_rmse'], 2),
-            'Train R²'           : round(metrics['train_r2'], 4),
-            'Tr4ain RMSE'        : round(metrics['train_rmse'], 2),
-            'CV R² Mean'         : round(metrics['cv_r2_mean'], 4),
-            'CV R² Std'          : round(metrics['cv_r2_std'], 4),
-            'Group CV R² Mean'   : round(metrics['group_cv_r2_mean'], 4),
-            'Group CV R² Std'    : round(metrics['group_cv_r2_std'], 4),
+            'Experiment'      : label,
+            'Test R²'         : round(metrics['test_r2'], 4),
+            'Test RMSE'       : round(metrics['test_rmse'], 2),
+            'Train R²'        : round(metrics['train_r2'], 4),
+            'Tr4ain RMSE'     : round(metrics['train_rmse'], 2),
+            'CV R² Mean'      : round(metrics['cv_r2_mean'], 4),
+            'CV R² Std'       : round(metrics['cv_r2_std'], 4),
+            'Group CV R² Mean': round(metrics['group_cv_r2_mean'], 4),
+            'Group CV R² Std' : round(metrics['group_cv_r2_std'], 4),
         })
 
     df = pd.DataFrame(rows)
@@ -132,9 +131,9 @@ def cross_validate(model_func, X_data, y_data, cv=10, scoring='r2'):
                                 cv=cv,
                                 scoring=scoring)
     print("\n Cross-validation ---")
-    print(f"CV R² mean : {cv_scores.mean():.4f}")
-    print(f"CV R² std  : {cv_scores.std():.4f}")
-    print(f"CV scores  : {cv_scores.round(3)}")
+    print(f"CV R² mean: {cv_scores.mean():.4f}")
+    print(f"CV R² std : {cv_scores.std():.4f}")
+    print(f"CV scores : {cv_scores.round(3)}")
 
     return cv_scores.mean(), cv_scores.std(), cv_scores
 
@@ -161,16 +160,15 @@ def cross_validate_by_groups(model_func, X_data, y_data, groups, n_splits=10, sc
     #    Fold 4 — test: Plot D    train: Plots A, B, C, E
     #    Fold 5 — test: Plot E    train: Plots A, B, C, D
     gkf       = GroupKFold(n_splits=n_splits)
-
     cv_scores = cross_val_score(model_func,
                                 X_data, y_data,
                                 cv=gkf.split(X_data, y_data, groups),
                                 scoring=scoring)
-    
+
     print("\nGrouped Cross-validation ---")
-    print(f"Grouped CV R² mean : {cv_scores.mean():.4f}")
-    print(f"Grouped CV R² std  : {cv_scores.std():.4f}")
-    print(f"Grouped CV scores  : {cv_scores.round(3)}")
+    print(f"Grouped CV R² mean: {cv_scores.mean():.4f}")
+    print(f"Grouped CV R² std : {cv_scores.std():.4f}")
+    print(f"Grouped CV scores : {cv_scores.round(3)}")
 
     return cv_scores.mean(), cv_scores.std(), cv_scores
 
@@ -193,8 +191,8 @@ def split_data_by_groups(X_var, y_var, groups):
     # 
     # n_splits=1 => One fixed split. 80-20 split in this case.
     # OUTPUT of GroupShuffleSplit(n_splits=1..)
-    #    train_idx = [0, 1, 2, 3, 4, 5, 9, 10, 11, 12, 13, 14]  # plots A, B, D, E
-    #    test_idx  = [6, 7, 8]                                    # plot C only
+    #   train_idx = [0, 1, 2, 3, 4, 5, 9, 10, 11, 12, 13, 14] # plots A,B,D,E
+    #   test_idx  = [6, 7, 8]                                 # plot C only
     #
     # next(gss.split())
     # -----------------
@@ -207,8 +205,9 @@ def split_data_by_groups(X_var, y_var, groups):
     #
     # Interpolation (The "Cheat" Split)
     # ---------------------------------
-    #  If the training set has 8 trees from Plot_A and the test set has the remaining 2 trees from
-    #  Plot_A, the  model is interpolating. It already knows the specific "vibe" of Plot_A.
+    #  If the training set has 8 trees from Plot_A and the test set has the
+    #  remaining 2 trees from Plot_A, the  model is interpolating. It already
+    #  knows the specific "vibe" of Plot_A.
     #
     #  Result:
     #   - High R2 that is false.
@@ -216,8 +215,8 @@ def split_data_by_groups(X_var, y_var, groups):
     #
     # Extrapolation (The "True" Split)
     # ---------------------------------
-    #  If you put every single tree from Plot_A into the test set and train the model only on
-    #  trees from Plot_B, C, and D, the model is extrapolating.
+    #  If you put every single tree from Plot_A into the test set and train the model
+    #  only on trees from Plot_B, C, and D, the model is extrapolating.
     #
     #  The "New Site": In this context, Plot_A is the "new site."
     #  It is a geographic location the model has never seen.
@@ -266,8 +265,9 @@ def split_data_ver2(X_var, y_var):
     # actually clustered or correlated due to a shared environment.
 
     # When is pseudo-replication NOT useful?
-    #  - Pseudo-replication is a problem specifically when your data has a hierarchical
-    #    structure, e.g., trees nested within plots, e.g. students nested within schools, etc.
+    #  - Pseudo-replication is a problem specifically when your data has a
+    #    hierarchical structure, e.g., trees nested within plots,
+    #    students nested within schools, etc.
     #  - In those cases observations within the same group are correlated and
     #   random splitting leaks information.
     # E.g.
@@ -276,12 +276,11 @@ def split_data_ver2(X_var, y_var):
     #    i.e., same EMIT pixel, same site conditions, same species mix.
     #  - The R² will be inflated.
     #  - You report a number that does not reflect real world performance on new sites.
-    
+
     # When is pseudo-replication useful?
     #  - Pseudo-replication is acceptable when your dataset has no meaningful
     #    grouping structure, aka, the observations are independent of each other.
 
-    
     X_train, X_test, y_train, y_test = train_test_split(X_var,
                                                         y_var,
                                                         test_size=0.2,
@@ -326,6 +325,14 @@ def handle_null_data(X_data):
 
     return X_data
 
+def linear_reg_groups(X_var, y_var, groups, label):
+    #groups = X_var['group']
+    X_train, X_test, y_train, y_test = split_data_by_groups(X_var, y_var, groups)
+    return linear_reg(X_train, X_test, y_train, y_test, groups, label)
+
+def linear_reg_ver2(X_train, X_test, y_train, y_test, groups, label):
+    return linear_reg(X_train, X_test, y_train, y_test, groups, label)
+
 def linear_reg(X_train, X_test, y_train, y_test, groups, label):
     X_var = pd.concat([X_train, X_test], axis=0)
     y_var = pd.concat([y_train, y_test], axis=0)
@@ -349,11 +356,11 @@ def linear_reg(X_train, X_test, y_train, y_test, groups, label):
     residuals   = y_test - y_pred
 
     print(f"\n--- {label} ---")
-    print(f"Test R²   : {test_r2:.4f}")
-    print(f"Test RMSE : {test_rmse:.2f} kg")
-    print(f"Train R²   : {train_r2:.4f}")
-    print(f"Train RMSE : {train_rmse:.2f} kg")
-    print(f"Features: {X_var.shape[1]}")
+    print(f"Test R²     : {test_r2:.4f}")
+    print(f"Test RMSE   : {test_rmse:.2f} kg")
+    print(f"Train R²    : {train_r2:.4f}")
+    print(f"Train RMSE  : {train_rmse:.2f} kg")
+    print(f"Num Features: {X_var.shape[1]}")
 
     cv_r2_mean, cv_r2_std, cv_scores = cross_validate(LinearRegression(),
                                                       X_var,
@@ -387,6 +394,14 @@ def linear_reg(X_train, X_test, y_train, y_test, groups, label):
 
     return datum
 
+def randomForest_groups(X_var, y_var, groups, label):
+    X_train, X_test, y_train, y_test = split_data_by_groups(X_var, y_var, groups)
+
+    return random_forest(X_train, X_test, y_train, y_test, groups, label)
+
+def randomForest_ver2(X_train, X_test, y_train, y_test, groups, label):
+    return random_forest(X_train, X_test, y_train, y_test, groups, label)
+
 def random_forest(X_train, X_test, y_train, y_test, groups, label):
     X_var = pd.concat([X_train, X_test], axis=0)
     y_var = pd.concat([y_train, y_test], axis=0)
@@ -414,12 +429,12 @@ def random_forest(X_train, X_test, y_train, y_test, groups, label):
 
     residuals  = y_test - y_pred
     
-    print(f"EXPERIMENT: {label}")
-    print(f"Test R²   : {test_r2:.4f}")
-    print(f"Test RMSE : {test_rmse:.2f} kg")
-    print(f"Train R²   : {train_r2:.4f}")
-    print(f"Train RMSE : {train_rmse:.2f} kg")
-    print(f"Features: {X_var.shape[1]}")
+    print(f"EXPERIMENT  : {label}")
+    print(f"Test R²     : {test_r2:.4f}")
+    print(f"Test RMSE   : {test_rmse:.2f} kg")
+    print(f"Train R²    : {train_r2:.4f}")
+    print(f"Train RMSE  : {train_rmse:.2f} kg")
+    print(f"Num Features: {X_var.shape[1]}")
 
     cv_r2_mean, cv_r2_std, cv_scores = cross_validate(rf,
                                                       X_var,
@@ -436,7 +451,7 @@ def random_forest(X_train, X_test, y_train, y_test, groups, label):
                                      groups,
                                      n_splits=10,
                                      scoring='r2')
-    
+
     importances = pd.Series(rf.feature_importances_, index=X_var.columns)
 
     datum = {"test_r2": test_r2,
